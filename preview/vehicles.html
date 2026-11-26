@@ -1,0 +1,31 @@
+<!DOCTYPE html><html><head><meta charset="utf-8"><title>vehicles preview</title>
+<style>html,body{margin:0;overflow:hidden;background:#0a0d12}</style></head><body>
+<script src="../vendor/three.min.js"></script>
+<script src="../src/config.js"></script>
+<script src="../src/utils.js"></script>
+<script src="../src/vehicles.js"></script>
+<script>
+const renderer=new THREE.WebGLRenderer({antialias:true});renderer.setSize(innerWidth,innerHeight);renderer.shadowMap.enabled=true;document.body.appendChild(renderer.domElement);
+const scene=new THREE.Scene();scene.background=new THREE.Color(0xbfd6e4);scene.fog=new THREE.Fog(0xbfd6e4,60,220);
+const camera=new THREE.PerspectiveCamera(50,innerWidth/innerHeight,.1,500);
+scene.add(new THREE.HemisphereLight(0xcfe4ff,0x555a50,1.25));
+const sun=new THREE.DirectionalLight(0xfff1d8,2.2);sun.position.set(8,14,6);sun.castShadow=true;sun.shadow.mapSize.set(1024,1024);sun.shadow.camera.left=-30;sun.shadow.camera.right=30;sun.shadow.camera.top=30;sun.shadow.camera.bottom=-30;scene.add(sun);
+const ground=new THREE.Mesh(new THREE.PlaneGeometry(120,120),new THREE.MeshLambertMaterial({color:0x6f747a}));ground.rotation.x=-Math.PI/2;ground.receiveShadow=true;scene.add(ground);
+const road=new THREE.Mesh(new THREE.PlaneGeometry(120,12),new THREE.MeshLambertMaterial({color:0x35383d}));road.rotation.x=-Math.PI/2;road.position.y=.01;scene.add(road);
+const types=['scooter','sedan','taxi','suv','bus','truck','police'];
+const row=new THREE.Group();scene.add(row);
+let x=-16.5;
+types.forEach((t,i)=>{const v=TG.Vehicles.create(t,{color:[0xd23c3c,0x2f6fa8,0x3aa06a][i%3],rider:i===0?0x3366aa:null});v.group.position.set(x,0,0);row.add(v.group);x+= (t==='bus'?7.5:t==='truck'?5.5:3.2);});
+const traffic=new TG.Traffic(scene,{count:18});traffic.update(0.016,{playerX:0,playerZ:40,night:0});
+let t=0;for(let i=0;i<300;i++){t+=0.03;traffic.update(0.03,{playerX:0,playerZ:40,night:0});}
+const views={
+ row:{p:[0,4.5,14],l:[0,1,0]},
+ scooter:{p:[2.2,1.6,3.4],l:[-16,0.9,0]},
+ police:{p:[-1,2.2,4],l:[0,0.8,0]},
+ traffic:{p:[0,26,42],l:[0,0,0]},
+ night:{p:[-2,4,14],l:[0,1,0],night:1}
+};
+TG._shot=(n)=>{const v=views[n]||views.row; if(v.night!==undefined) scene.traverse(o=>{if(o.material&&o.material.emissive) o.material.emissiveIntensity=v.night;});
+ camera.position.set(...v.p);camera.lookAt(...v.l);renderer.render(scene,camera);return JSON.stringify({cars:traffic.cars.length});};
+TG._shot('row');
+</script></body></html>

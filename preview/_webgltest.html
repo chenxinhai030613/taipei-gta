@@ -1,0 +1,12 @@
+<!DOCTYPE html><html><body style="margin:0;overflow:hidden">
+<script src="../vendor/three.min.js"></script>
+<script>
+const r=new THREE.WebGLRenderer({antialias:true});r.setSize(innerWidth,innerHeight);document.body.appendChild(r.domElement);
+const s=new THREE.Scene();s.background=new THREE.Color(0x102040);
+const c=new THREE.PerspectiveCamera(60,innerWidth/innerHeight,.1,1000);c.position.set(3,2,5);c.lookAt(0,0,0);
+s.add(new THREE.HemisphereLight(0xffffff,0x334455,1.2));
+const m=new THREE.Mesh(new THREE.BoxGeometry(1,1,1),new THREE.MeshStandardMaterial({color:0xff8844,roughness:.4}));s.add(m);
+const d=new THREE.DirectionalLight(0xffffff,2);d.position.set(3,5,2);s.add(d);
+r.render(s,c);
+document.title='WEBGL_OK';
+</script></body></html>

@@ -1,0 +1,42 @@
+<!DOCTYPE html>
+<html><head><meta charset="utf-8"><title>city preview</title>
+<style>html,body{margin:0;overflow:hidden;background:#000}canvas{display:block}</style></head>
+<body>
+<script src="../vendor/three.min.js"></script>
+<script src="../src/config.js"></script>
+<script src="../src/utils.js"></script>
+<script src="../src/city.js"></script>
+<script>
+const renderer = new THREE.WebGLRenderer({antialias:true});
+renderer.setSize(innerWidth, innerHeight);
+renderer.setPixelRatio(1);
+renderer.shadowMap.enabled = true;
+renderer.shadowMap.type = THREE.PCFSoftShadowMap;
+document.body.appendChild(renderer.domElement);
+const scene = new THREE.Scene();
+const camera = new THREE.PerspectiveCamera(60, innerWidth/innerHeight, 0.1, 6000);
+const city = TG.City.build(scene, {seed: 8821});
+let tod = 17.4;
+city.update(0, tod);
+const views = {
+  wide:  { pos: [420, 190, 470], look: [80, 40, 120] },
+  street:{ pos: [-80, 2.2, 40], look: [40, 14, 60] },
+  sky:   { pos: [180, 30, 160], look: [280, 240, 280] },
+  night: { pos: [120, 34, 210], look: [240, 30, 120], tod: 21.5 },
+  dusk:  { pos: [-240, 26, 20], look: [40, 30, 120], tod: 18.3 },
+  aerial:{ pos: [0, 620, 380], look: [0, 0, 40] }
+};
+TG._shot = function(name) {
+  const v = views[name] || views.wide;
+  if (v.tod !== undefined) { tod = v.tod; city.update(0, tod); }
+  camera.position.set(v.pos[0], v.pos[1], v.pos[2]);
+  camera.lookAt(v.look[0], v.look[1], v.look[2]);
+  city.followCamera(camera);
+  renderer.render(scene, camera);
+  return JSON.stringify({ ok: true, stats: city.stats() });
+};
+TG._stats = () => city.stats();
+addEventListener('resize', () => { renderer.setSize(innerWidth, innerHeight); camera.aspect = innerWidth/innerHeight; camera.updateProjectionMatrix(); });
+TG._shot('wide');
+</script>
+</body></html>
